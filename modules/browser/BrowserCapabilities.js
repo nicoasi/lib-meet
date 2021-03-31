@@ -22,7 +22,7 @@ export default class BrowserCapabilities extends BrowserDetection {
     constructor() {
         super();
         logger.info(
-            `This appears to be ${this.getName()}, ver: ${this.getVersion()}`);
+            `Nico thinks this appears to be ${this.getName()}, ver: ${this.getVersion()}`);
     }
 
     /**
