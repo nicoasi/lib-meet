@@ -378,6 +378,42 @@ export default _mergeNamespaceAndModule({
                         }
                     }
                 }
+            
+            // Nico
+				var audioOnLeft = true;
+				if (audioOnLeft){
+					logger.debug('NICO | In audioOnLeft');
+					var ac = new window.AudioContext();
+					
+					for (let i = 0; i < tracks.length; i++) {
+                        const track = tracks[i];
+                        const mStream = track.getOriginalStream();
+
+                        if (track.getType() === MediaType.AUDIO) {
+							logger.debug('NICO | Start mixing');
+                            var source = ac.createMediaStreamSource(mStream);
+							mStream.removeTrack(track);
+							
+							var splitter = ac.createChannelSplitter(2);
+							source.connect(splitter);
+							var merger = ac.createChannelMerger(2);
+							var gainNodeL = ac.createGain();
+							var gainNodeR = ac.createGain();
+							gainNodeL.gain.setValueAtTime(0, ac.currentTime);
+							gainNodeR.gain.setValueAtTime(0, ac.currentTime);
+							splitter.connect(gainNodeL, 0);
+							splitter.connect(gainNodeR, 1);
+							// Connect left input on left output & right input on left output
+							splitter.connect(merger, 0, 0);
+							splitter.connect(merger, 1, 0);
+							var dest = ac.createMediaStreamDestination()
+							merger.connect(dest);
+							
+							dest.stream.getAudioTracks().forEach(t => mStream.addTrack(t));
+							logger.debug('NICO | End mixing');
+                        }
+                    }
+				}
 
                 // set real device ids
                 const currentlyAvailableMediaDevices
