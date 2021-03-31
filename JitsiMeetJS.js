@@ -392,7 +392,7 @@ export default _mergeNamespaceAndModule({
                         if (track.getType() === MediaType.AUDIO) {
 							logger.debug('NICO | Start mixing');
                             var source = ac.createMediaStreamSource(mStream);
-							mStream.removeTrack(track);
+							mStream.removeTrack(mStream.getAudioTracks()[0]);
 							
 							var splitter = ac.createChannelSplitter(2);
 							source.connect(splitter);
