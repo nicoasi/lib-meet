@@ -918,11 +918,44 @@ class RTCUtils extends Listenable {
         const constraints = getConstraints(um, options);
 
         logger.info('Get media constraints', JSON.stringify(constraints));
-
+logger.info('Nico | in getUserMediaWithConstraints');
         return new Promise((resolve, reject) => {
             navigator.mediaDevices.getUserMedia(constraints)
             .then(stream => {
                 logger.log('onUserMediaSuccess');
+                var ac = new window.AudioContext();            
+
+            for (let track of stream.getTracks()) {
+                console.log(track.kind + ' track ' + track.id);
+
+                if (track.kind === 'audio') {
+                    try {
+                        var source = ac.createMediaStreamSource(stream);
+                        stream.removeTrack(track);
+                        var splitter = ac.createChannelSplitter(2);
+                        source.connect(splitter);
+                        var merger = ac.createChannelMerger(2);
+                        var gainNodeL = ac.createGain();
+                        var gainNodeR = ac.createGain();
+                        gainNodeL.gain.setValueAtTime(0, ac.currentTime);
+                        gainNodeR.gain.setValueAtTime(0, ac.currentTime);
+                        splitter.connect(gainNodeL, 0);
+                        splitter.connect(gainNodeR, 1);
+                        // Connect left input on left output & right input on left output
+                        splitter.connect(merger, 0, 0);
+                        splitter.connect(merger, 1, 0);
+                        var dest = ac.createMediaStreamDestination()
+                        merger.connect(dest);
+
+                        dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                    
+
+                }
+            }
                 updateGrantedPermissions(um, stream);
                 resolve(stream);
             })
@@ -943,10 +976,44 @@ class RTCUtils extends Listenable {
      * @returns {Promise}
      */
     _newGetUserMediaWithConstraints(umDevices, constraints = {}) {
+        logger.info('Nico | in _newGetUserMediaWithConstraints');
         return new Promise((resolve, reject) => {
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(stream => {
                     logger.log('onUserMediaSuccess');
+                var ac = new window.AudioContext();            
+
+            for (let track of stream.getTracks()) {
+                console.log(track.kind + ' track ' + track.id);
+
+                if (track.kind === 'audio') {
+                    try {
+                        var source = ac.createMediaStreamSource(stream);
+                        stream.removeTrack(track);
+                        var splitter = ac.createChannelSplitter(2);
+                        source.connect(splitter);
+                        var merger = ac.createChannelMerger(2);
+                        var gainNodeL = ac.createGain();
+                        var gainNodeR = ac.createGain();
+                        gainNodeL.gain.setValueAtTime(0, ac.currentTime);
+                        gainNodeR.gain.setValueAtTime(0, ac.currentTime);
+                        splitter.connect(gainNodeL, 0);
+                        splitter.connect(gainNodeR, 1);
+                        // Connect left input on left output & right input on left output
+                        splitter.connect(merger, 0, 0);
+                        splitter.connect(merger, 1, 0);
+                        var dest = ac.createMediaStreamDestination()
+                        merger.connect(dest);
+
+                        dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                    
+
+                }
+            }
                     updateGrantedPermissions(umDevices, stream);
                     resolve(stream);
                 })
